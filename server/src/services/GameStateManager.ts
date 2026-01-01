@@ -3,6 +3,7 @@ import { matchmaking, ActiveGame } from './MatchmakingService.js';
 import { dropDisc, checkWinner, isBoardFull, getWinningCells, Player } from '../game/GameLogic.js';
 import { getBotMove } from '../game/BotAI.js';
 import { db } from '../database/db.js';
+import { kafkaProducer } from '../kafka/producer.js';
 
 const BOT_MOVE_DELAY = 800;
 const RECONNECT_TIMEOUT = 30000;
@@ -42,6 +43,7 @@ class GameStateManager {
         }
 
         game.moves.push({ player: username, column, timestamp: Date.now() });
+        kafkaProducer.moveMade(game.id, username, column, playerNumber);
 
         const winner = checkWinner(game.board, row, column);
         if (winner) {
@@ -86,6 +88,7 @@ class GameStateManager {
             timeout: RECONNECT_TIMEOUT / 1000,
         });
 
+        kafkaProducer.playerDisconnected(game.id, username);
         console.log(`⏳ ${username} disconnected, 30s to reconnect`);
     }
 
@@ -115,6 +118,7 @@ class GameStateManager {
         const opponent = game.player1 === username ? game.player2 : game.player1;
         wsHandler.sendToUser(opponent, { type: 'opponentReconnected' });
 
+        kafkaProducer.playerReconnected(game.id, username);
         console.log(`🔄 ${username} reconnected to game ${game.id}`);
         return true;
     }
@@ -208,6 +212,7 @@ class GameStateManager {
         }
 
         this.persistGame(game, winner, result, duration);
+        kafkaProducer.gameEnded(game.id, winner, result, duration, game.player1, game.player2, game.isPlayer2Bot);
 
         this.disconnectedPlayers.delete(game.player1);
         this.disconnectedPlayers.delete(game.player2);

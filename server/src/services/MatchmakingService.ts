@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { wsHandler, GameWebSocket } from './WebSocketHandler.js';
 import { createEmptyBoard, Board, Player } from '../game/GameLogic.js';
+import { kafkaProducer } from '../kafka/producer.js';
 
 const MATCHMAKING_TIMEOUT = 10000;
 
@@ -127,6 +128,8 @@ class MatchmakingService {
         if (!isPlayer2Bot) {
             wsHandler.sendToUser(player2, gameStartMsg(2, player1));
         }
+
+        kafkaProducer.gameStarted(gameId, player1, player2, isPlayer2Bot);
 
         console.log(`🎮 Game started: ${player1} vs ${player2} (${gameId})`);
         return gameId;

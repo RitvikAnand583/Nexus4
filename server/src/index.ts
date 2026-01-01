@@ -5,6 +5,7 @@ import { wsHandler } from './services/WebSocketHandler.js';
 import { matchmaking } from './services/MatchmakingService.js';
 import { gameState } from './services/GameStateManager.js';
 import { db } from './database/db.js';
+import { kafkaProducer } from './kafka/producer.js';
 import routes from './routes/routes.js';
 
 const PORT = process.env.PORT || 3001;
@@ -68,6 +69,7 @@ wsHandler.onMessage('_disconnect', (ws, msg) => {
 
 async function start() {
     await db.connect();
+    await kafkaProducer.connect();
 
     server.listen(PORT, () => {
         console.log(`
@@ -84,6 +86,7 @@ async function start() {
 process.on('SIGINT', async () => {
     console.log('\nShutting down...');
     wsHandler.shutdown();
+    await kafkaProducer.disconnect();
     await db.disconnect();
     process.exit(0);
 });
