@@ -2,6 +2,7 @@ import { wsHandler, GameWebSocket } from './WebSocketHandler.js';
 import { matchmaking, ActiveGame } from './MatchmakingService.js';
 import { dropDisc, checkWinner, isBoardFull, getWinningCells, Player } from '../game/GameLogic.js';
 import { getBotMove } from '../game/BotAI.js';
+import { db } from '../database/db.js';
 
 const BOT_MOVE_DELAY = 800;
 const RECONNECT_TIMEOUT = 30000;
@@ -206,6 +207,8 @@ class GameStateManager {
             wsHandler.sendToUser(game.player2, gameOverMsg);
         }
 
+        this.persistGame(game, winner, result, duration);
+
         this.disconnectedPlayers.delete(game.player1);
         this.disconnectedPlayers.delete(game.player2);
 
@@ -219,11 +222,45 @@ class GameStateManager {
         return null;
     }
 
+    private async persistGame(game: ActiveGame, winner: string | null, result: 'win' | 'draw' | 'forfeit', duration: number): Promise<void> {
+        await db.saveGame({
+            id: game.id,
+            player1Username: game.player1,
+            player2Username: game.player2,
+            winnerUsername: winner,
+            isBotGame: game.isPlayer2Bot,
+            moves: game.moves,
+            result,
+            durationSeconds: duration,
+            startedAt: game.startedAt,
+        });
+
+        if (result === 'win' && winner) {
+            const loser = winner === game.player1 ? game.player2 : game.player1;
+            await db.updatePlayerStats(winner, 'win');
+            if (!game.isPlayer2Bot || winner !== game.player2) {
+                await db.updatePlayerStats(loser, 'loss');
+            }
+        } else if (result === 'draw') {
+            await db.updatePlayerStats(game.player1, 'draw');
+            if (!game.isPlayer2Bot) {
+                await db.updatePlayerStats(game.player2, 'draw');
+            }
+        } else if (result === 'forfeit' && winner) {
+            await db.updatePlayerStats(winner, 'win');
+            const loser = winner === game.player1 ? game.player2 : game.player1;
+            if (!game.isPlayer2Bot) {
+                await db.updatePlayerStats(loser, 'loss');
+            }
+        }
+    }
+
     handleForfeit(username: string): void {
         const game = matchmaking.getGameByPlayer(username);
         if (!game) return;
 
         const winner = game.player1 === username ? game.player2 : game.player1;
+        const duration = Math.floor((Date.now() - game.startedAt.getTime()) / 1000);
 
         const gameOverMsg = {
             type: 'gameOver',
@@ -236,6 +273,8 @@ class GameStateManager {
         if (!game.isPlayer2Bot) {
             wsHandler.sendToUser(winner, gameOverMsg);
         }
+
+        this.persistGame(game, game.isPlayer2Bot ? null : winner, 'forfeit', duration);
 
         matchmaking.endGame(game.id);
         console.log(`🚪 Game ${game.id}: ${username} forfeited`);

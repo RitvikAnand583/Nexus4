@@ -4,6 +4,7 @@ import { createServer } from 'http';
 import { wsHandler } from './services/WebSocketHandler.js';
 import { matchmaking } from './services/MatchmakingService.js';
 import { gameState } from './services/GameStateManager.js';
+import { db } from './database/db.js';
 
 const PORT = process.env.PORT || 3001;
 
@@ -29,6 +30,7 @@ wsHandler.initialize(server);
 wsHandler.onMessage('join', (ws, msg) => {
     if (msg.username) {
         wsHandler.registerUser(ws, msg.username);
+        db.upsertPlayer(msg.username);
         wsHandler.send(ws, { type: 'joined', username: msg.username });
         console.log(`👤 User joined: ${msg.username}`);
     }
@@ -72,19 +74,26 @@ wsHandler.onMessage('_disconnect', (ws, msg) => {
     }
 });
 
-server.listen(PORT, () => {
-    console.log(`
-╔═══════════════════════════════════════════════════════╗
-║        🎮 Four in a Row Server Started! 🎮            ║
-╠═══════════════════════════════════════════════════════╣
-║  HTTP:      http://localhost:${PORT}                    ║
-║  WebSocket: ws://localhost:${PORT}                      ║
-╚═══════════════════════════════════════════════════════╝
-    `);
-});
+async function start() {
+    await db.connect();
 
-process.on('SIGINT', () => {
+    server.listen(PORT, () => {
+        console.log(`
+╔═══════════════════════════════════════════════════════╗
+║        🎮 Nexus4 Server Started! 🎮                   ║
+╠═══════════════════════════════════════════════════════╣
+║  HTTP:      http://localhost:${PORT}                  ║
+║  WebSocket: ws://localhost:${PORT}                    ║
+╚═══════════════════════════════════════════════════════╝
+        `);
+    });
+}
+
+process.on('SIGINT', async () => {
     console.log('\nShutting down...');
     wsHandler.shutdown();
+    await db.disconnect();
     process.exit(0);
 });
+
+start().catch(console.error);
