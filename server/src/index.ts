@@ -5,6 +5,7 @@ import { wsHandler } from './services/WebSocketHandler.js';
 import { matchmaking } from './services/MatchmakingService.js';
 import { gameState } from './services/GameStateManager.js';
 import { db } from './database/db.js';
+import routes from './routes/routes.js';
 
 const PORT = process.env.PORT || 3001;
 
@@ -12,16 +13,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-
-app.get('/health', (req, res) => {
-    res.json({
-        status: 'ok',
-        connections: wsHandler.getConnectionCount(),
-        queueSize: matchmaking.getQueueSize(),
-        activeGames: matchmaking.getActiveGamesCount(),
-        timestamp: new Date().toISOString(),
-    });
-});
+app.use(routes);
 
 const server = createServer(app);
 
