@@ -3,6 +3,7 @@ import cors from 'cors';
 import { createServer } from 'http';
 import { wsHandler } from './services/WebSocketHandler.js';
 import { matchmaking } from './services/MatchmakingService.js';
+import { gameState } from './services/GameStateManager.js';
 
 const PORT = process.env.PORT || 3001;
 
@@ -11,7 +12,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Health check
 app.get('/health', (req, res) => {
     res.json({
         status: 'ok',
@@ -24,12 +24,8 @@ app.get('/health', (req, res) => {
 
 const server = createServer(app);
 
-// Initialize WebSocket
 wsHandler.initialize(server);
 
-// === WebSocket Message Handlers ===
-
-// Join: Register username
 wsHandler.onMessage('join', (ws, msg) => {
     if (msg.username) {
         wsHandler.registerUser(ws, msg.username);
@@ -38,7 +34,6 @@ wsHandler.onMessage('join', (ws, msg) => {
     }
 });
 
-// Find Game: Add to matchmaking queue
 wsHandler.onMessage('findGame', (ws, msg) => {
     if (ws.username) {
         matchmaking.addToQueue(ws, ws.username);
@@ -47,17 +42,22 @@ wsHandler.onMessage('findGame', (ws, msg) => {
     }
 });
 
-// Cancel Queue: Remove from matchmaking
 wsHandler.onMessage('cancelQueue', (ws, msg) => {
     if (ws.username) {
         matchmaking.cancelQueue(ws.username);
     }
 });
 
-// Handle disconnect: Remove from queue
+wsHandler.onMessage('move', (ws, msg) => {
+    if (ws.username && msg.column !== undefined) {
+        gameState.handleMove(ws.username, msg.column);
+    }
+});
+
 wsHandler.onMessage('_disconnect', (ws, msg) => {
     if (ws.username) {
         matchmaking.removeFromQueue(ws.username);
+        gameState.handleForfeit(ws.username);
     }
 });
 
@@ -72,7 +72,6 @@ server.listen(PORT, () => {
     `);
 });
 
-// Graceful shutdown
 process.on('SIGINT', () => {
     console.log('\nShutting down...');
     wsHandler.shutdown();
