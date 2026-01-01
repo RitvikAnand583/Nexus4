@@ -54,10 +54,21 @@ wsHandler.onMessage('move', (ws, msg) => {
     }
 });
 
+wsHandler.onMessage('rejoin', (ws, msg) => {
+    if (msg.username) {
+        if (gameState.handleReconnect(ws, msg.username)) {
+            console.log(`🔄 ${msg.username} rejoined game`);
+        } else {
+            wsHandler.registerUser(ws, msg.username);
+            wsHandler.send(ws, { type: 'joined', username: msg.username });
+        }
+    }
+});
+
 wsHandler.onMessage('_disconnect', (ws, msg) => {
     if (ws.username) {
         matchmaking.removeFromQueue(ws.username);
-        gameState.handleForfeit(ws.username);
+        gameState.handleDisconnect(ws.username);
     }
 });
 

@@ -16,33 +16,26 @@ export function getBotMove(board: Board, botPlayer: Player): number {
 
     if (validCols.length === 0) return -1;
 
-    // Priority 1: Win immediately
     for (const col of validCols) {
         if (canWinWithMove(board, col, botPlayer)) {
             return col;
         }
     }
 
-    // Priority 2: Block opponent's winning move
     for (const col of validCols) {
         if (canWinWithMove(board, col, opponent)) {
             return col;
         }
     }
 
-    // Priority 3: Block opponent's two-way win setup
     const blockMove = findTwoWayBlockMove(board, opponent);
     if (blockMove !== -1 && validCols.includes(blockMove)) {
         return blockMove;
     }
-
-    // Priority 4: Create own two-way win setup
     const setupMove = findTwoWaySetupMove(board, botPlayer);
     if (setupMove !== -1 && validCols.includes(setupMove)) {
         return setupMove;
     }
-
-    // Priority 5: Prefer center columns (better strategic position)
     const centerPreference = [3, 2, 4, 1, 5, 0, 6];
     for (const col of centerPreference) {
         if (validCols.includes(col) && !createsOpponentWin(board, col, botPlayer, opponent)) {
@@ -50,14 +43,12 @@ export function getBotMove(board: Board, botPlayer: Player): number {
         }
     }
 
-    // Fallback: Any valid move that doesn't give opponent immediate win
     for (const col of validCols) {
         if (!createsOpponentWin(board, col, botPlayer, opponent)) {
             return col;
         }
     }
 
-    // Last resort: Any valid column
     return validCols[0];
 }
 
@@ -73,7 +64,6 @@ function createsOpponentWin(board: Board, col: number, botPlayer: Player, oppone
     const row = dropDisc(testBoard, col, botPlayer);
     if (row === -1) return true;
 
-    // Check if dropping here gives opponent a winning move above
     if (row > 0) {
         const opponentRow = row - 1;
         testBoard[opponentRow][col] = opponent;
@@ -92,7 +82,6 @@ function findTwoWaySetupMove(board: Board, player: Player): number {
         const row = dropDisc(testBoard, col, player);
         if (row === -1) continue;
 
-        // Count how many winning moves player would have after this move
         let winningMoves = 0;
         for (const nextCol of getValidColumns(testBoard)) {
             if (canWinWithMove(testBoard, nextCol, player)) {
