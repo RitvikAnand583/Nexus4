@@ -1,0 +1,126 @@
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '../lib/utils';
+
+interface LobbyProps {
+    onJoin: (username: string) => void;
+    onFindGame: () => void;
+    onCancelQueue: () => void;
+    isJoined: boolean;
+    isSearching: boolean;
+    username: string;
+    connected: boolean;
+}
+
+export function Lobby({
+    onJoin,
+    onFindGame,
+    onCancelQueue,
+    isJoined,
+    isSearching,
+    username,
+    connected,
+}: LobbyProps) {
+    const [inputValue, setInputValue] = useState('');
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (inputValue.trim()) {
+            onJoin(inputValue.trim());
+        }
+    };
+
+    return (
+        <div className="flex flex-col items-center gap-8 w-full max-w-md">
+            <AnimatePresence mode="wait">
+                {!isJoined ? (
+                    <motion.form
+                        key="join-form"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        onSubmit={handleSubmit}
+                        className="w-full space-y-4"
+                    >
+                        <div className="relative">
+                            <input
+                                type="text"
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                placeholder="Enter your username"
+                                maxLength={20}
+                                className="w-full px-6 py-4 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-lg"
+                            />
+                            <div className="absolute inset-0 -z-10 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl blur-xl" />
+                        </div>
+                        <button
+                            type="submit"
+                            disabled={!inputValue.trim() || !connected}
+                            className={cn(
+                                "w-full py-4 rounded-xl font-semibold text-lg transition-all",
+                                "bg-gradient-to-r from-blue-500 to-purple-500 text-white",
+                                "hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed",
+                                "shadow-lg shadow-blue-500/25"
+                            )}
+                        >
+                            Join Game
+                        </button>
+                    </motion.form>
+                ) : (
+                    <motion.div
+                        key="matchmaking"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="w-full space-y-6 text-center"
+                    >
+                        <div className="p-4 bg-gray-800/50 rounded-xl border border-gray-700">
+                            <p className="text-gray-400 text-sm">Playing as</p>
+                            <p className="text-2xl font-bold text-white">{username}</p>
+                        </div>
+
+                        {!isSearching ? (
+                            <button
+                                onClick={onFindGame}
+                                className={cn(
+                                    "w-full py-4 rounded-xl font-semibold text-lg transition-all",
+                                    "bg-gradient-to-r from-green-500 to-emerald-500 text-white",
+                                    "hover:opacity-90 shadow-lg shadow-green-500/25"
+                                )}
+                            >
+                                🎮 Find Game
+                            </button>
+                        ) : (
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-center gap-3">
+                                    <motion.div
+                                        animate={{ rotate: 360 }}
+                                        transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                                        className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full"
+                                    />
+                                    <span className="text-lg text-gray-300">Searching for opponent...</span>
+                                </div>
+                                <p className="text-sm text-gray-500">
+                                    Bot will join if no player found in 10 seconds
+                                </p>
+                                <button
+                                    onClick={onCancelQueue}
+                                    className="px-6 py-2 text-gray-400 hover:text-white transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {!connected && (
+                <div className="flex items-center gap-2 text-yellow-500">
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
+                    <span className="text-sm">Connecting to server...</span>
+                </div>
+            )}
+        </div>
+    );
+}
