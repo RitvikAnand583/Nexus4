@@ -30,14 +30,13 @@ export function GameResult({
 
     return (
         <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
             className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
         >
             <motion.div
-                initial={{ scale: 0.8, y: 50 }}
-                animate={{ scale: 1, y: 0 }}
-                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                initial={{ y: 50 }}
+                animate={{ y: 0 }}
                 className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 max-w-md w-full shadow-2xl border border-gray-700"
             >
                 <motion.div
@@ -95,14 +94,16 @@ export function GameResult({
                     Play Again
                 </button>
 
-                <motion.p
+                <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.5 }}
-                    className="mt-4 text-center text-gray-500 text-sm"
+                    className="mt-4 text-center"
                 >
-                    {isWin ? '+1 Win' : isDraw ? '+1 Draw' : '+1 Loss'} added to your stats
-                </motion.p>
+                    <p className="text-gray-500 text-sm">
+                        {isWin ? '+1 Win' : isDraw ? '+1 Draw' : '+1 Loss'} added to your stats
+                    </p>
+                </motion.div>
             </motion.div>
         </motion.div>
     );
