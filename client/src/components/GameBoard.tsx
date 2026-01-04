@@ -27,64 +27,78 @@ export function GameBoard({
         winningCells.some(([r, c]) => r === row && c === col);
 
     return (
-        <div className="flex flex-col items-center gap-4">
-            <div className="relative p-4 bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl shadow-2xl">
-                <div className="absolute inset-0 bg-blue-500/20 rounded-2xl blur-xl" />
-                <div className="relative grid grid-cols-7 gap-2">
-                    {Array.from({ length: 7 }).map((_, col) => (
-                        <button
-                            key={col}
-                            onClick={() => !disabled && isYourTurn && onColumnClick(col)}
-                            disabled={disabled || !isYourTurn}
-                            className={cn(
-                                "flex flex-col gap-2 p-1 rounded-lg transition-all duration-200",
-                                isYourTurn && !disabled && "hover:bg-blue-400/30 cursor-pointer",
-                                (!isYourTurn || disabled) && "cursor-not-allowed"
-                            )}
-                        >
-                            {board.map((row, rowIdx) => (
-                                <motion.div
-                                    key={`${rowIdx}-${col}`}
-                                    initial={row[col] !== 0 ? { y: -100, opacity: 0 } : false}
-                                    animate={{ y: 0, opacity: 1 }}
-                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                                    className={cn(
-                                        "w-12 h-12 md:w-14 md:h-14 rounded-full border-4 transition-all duration-300",
-                                        row[col] === 0 && "bg-blue-900/50 border-blue-700/50",
-                                        row[col] === 1 && "bg-gradient-to-br from-red-400 to-red-600 border-red-300 shadow-lg shadow-red-500/50",
-                                        row[col] === 2 && "bg-gradient-to-br from-yellow-300 to-yellow-500 border-yellow-200 shadow-lg shadow-yellow-400/50",
-                                        isWinningCell(rowIdx, col) && "ring-4 ring-white animate-pulse scale-110"
-                                    )}
-                                />
-                            ))}
-                        </button>
-                    ))}
+        <div className="flex flex-col items-center gap-6">
+            <div className="relative">
+                <div className="absolute -inset-1 bg-gradient-to-r from-emerald-600/30 to-gray-700/30 rounded-3xl blur-sm" />
+                <div className="relative bg-gradient-to-b from-gray-800 to-gray-900 p-3 rounded-2xl border border-gray-700 shadow-2xl">
+                    <div className="grid grid-cols-7 gap-2">
+                        {Array.from({ length: 7 }).map((_, col) => (
+                            <button
+                                key={col}
+                                onClick={() => !disabled && isYourTurn && onColumnClick(col)}
+                                disabled={disabled || !isYourTurn}
+                                className={cn(
+                                    "flex flex-col gap-2 p-1 rounded-xl transition-all duration-200",
+                                    isYourTurn && !disabled && "hover:bg-emerald-900/30 cursor-pointer",
+                                    (!isYourTurn || disabled) && "cursor-not-allowed"
+                                )}
+                            >
+                                {board.map((row, rowIdx) => (
+                                    <motion.div
+                                        key={`${rowIdx}-${col}`}
+                                        initial={row[col] !== 0 ? { y: -80, opacity: 0 } : false}
+                                        animate={{ y: 0, opacity: 1 }}
+                                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                                        className={cn(
+                                            "w-14 h-14 rounded-full transition-all duration-200",
+                                            row[col] === 0 && "bg-gray-950 border-2 border-gray-800 shadow-inner",
+                                            row[col] === 1 && "bg-gradient-to-br from-emerald-400 to-emerald-600 border-2 border-emerald-300 shadow-lg shadow-emerald-500/40",
+                                            row[col] === 2 && "bg-gradient-to-br from-gray-300 to-gray-500 border-2 border-gray-200 shadow-lg shadow-gray-400/40",
+                                            isWinningCell(rowIdx, col) && "ring-2 ring-white ring-offset-2 ring-offset-gray-900 animate-pulse scale-105"
+                                        )}
+                                    />
+                                ))}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </div>
 
-            <div className="flex items-center gap-3 text-lg font-medium">
-                <motion.div
-                    animate={{ scale: currentPlayer === 1 ? 1.2 : 1, opacity: currentPlayer === 1 ? 1 : 0.5 }}
-                    className={cn(
-                        "w-8 h-8 rounded-full",
-                        "bg-gradient-to-br from-red-400 to-red-600 border-2 border-red-300"
-                    )}
-                />
-                <span className="text-gray-400">vs</span>
-                <motion.div
-                    animate={{ scale: currentPlayer === 2 ? 1.2 : 1, opacity: currentPlayer === 2 ? 1 : 0.5 }}
-                    className={cn(
-                        "w-8 h-8 rounded-full",
-                        "bg-gradient-to-br from-yellow-300 to-yellow-500 border-2 border-yellow-200"
-                    )}
-                />
+            <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                    <motion.div
+                        animate={{ scale: currentPlayer === 1 ? 1.15 : 1, opacity: currentPlayer === 1 ? 1 : 0.4 }}
+                        className="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 border border-emerald-300"
+                    />
+                    <span className={cn(
+                        "text-sm font-medium",
+                        currentPlayer === 1 ? "text-white" : "text-gray-500"
+                    )}>
+                        {yourPlayer === 1 ? "You" : "Opponent"}
+                    </span>
+                </div>
+                <span className="text-gray-600">vs</span>
+                <div className="flex items-center gap-2">
+                    <motion.div
+                        animate={{ scale: currentPlayer === 2 ? 1.15 : 1, opacity: currentPlayer === 2 ? 1 : 0.4 }}
+                        className="w-6 h-6 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 border border-gray-200"
+                    />
+                    <span className={cn(
+                        "text-sm font-medium",
+                        currentPlayer === 2 ? "text-white" : "text-gray-500"
+                    )}>
+                        {yourPlayer === 2 ? "You" : "Opponent"}
+                    </span>
+                </div>
             </div>
 
             <p className={cn(
-                "text-lg font-semibold transition-colors",
-                isYourTurn ? "text-green-400" : "text-gray-400"
+                "text-sm font-medium px-4 py-2 rounded-full transition-all",
+                isYourTurn
+                    ? "bg-gray-700/50 text-white border border-gray-600"
+                    : "bg-gray-800/50 text-gray-400 border border-gray-700"
             )}>
-                {isYourTurn ? "Your turn - click a column!" : "Waiting for opponent..."}
+                {isYourTurn ? "Your turn" : "Waiting..."}
             </p>
         </div>
     );

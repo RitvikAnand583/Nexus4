@@ -52,8 +52,8 @@ export function GameResult({
 
                 <h2 className={cn(
                     "text-3xl font-bold text-center mb-2",
-                    isWin && "text-green-400",
-                    isDraw && "text-yellow-400",
+                    isWin && "text-emerald-400",
+                    isDraw && "text-gray-300",
                     !isWin && !isDraw && "text-red-400"
                 )}>
                     {isWin ? 'Victory!' : isDraw ? 'Draw!' : 'Defeat'}
@@ -74,8 +74,8 @@ export function GameResult({
                         <p className="text-gray-400 text-sm">Result</p>
                         <p className={cn(
                             "font-bold text-lg capitalize",
-                            isWin && "text-green-400",
-                            isDraw && "text-yellow-400",
+                            isWin && "text-emerald-400",
+                            isDraw && "text-gray-300",
                             !isWin && !isDraw && "text-red-400"
                         )}>
                             {result}
@@ -87,8 +87,8 @@ export function GameResult({
                     onClick={onPlayAgain}
                     className={cn(
                         "w-full py-3 rounded-xl font-semibold text-lg transition-all",
-                        "bg-gradient-to-r from-blue-500 to-purple-500 text-white",
-                        "hover:opacity-90 shadow-lg shadow-blue-500/25"
+                        "bg-gradient-to-r from-emerald-500 to-emerald-700 text-white",
+                        "hover:opacity-90 shadow-lg shadow-emerald-500/25"
                     )}
                 >
                     Play Again

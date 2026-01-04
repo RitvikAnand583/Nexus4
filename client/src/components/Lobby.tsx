@@ -49,18 +49,18 @@ export function Lobby({
                                 onChange={(e) => setInputValue(e.target.value)}
                                 placeholder="Enter your username"
                                 maxLength={20}
-                                className="w-full px-6 py-4 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-lg"
+                                className="w-full px-6 py-4 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-lg"
                             />
-                            <div className="absolute inset-0 -z-10 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl blur-xl" />
+                            <div className="absolute inset-0 -z-10 bg-gradient-to-r from-emerald-500/20 to-gray-500/20 rounded-xl blur-xl" />
                         </div>
                         <button
                             type="submit"
                             disabled={!inputValue.trim() || !connected}
                             className={cn(
                                 "w-full py-4 rounded-xl font-semibold text-lg transition-all",
-                                "bg-gradient-to-r from-blue-500 to-purple-500 text-white",
+                                "bg-gradient-to-r from-gray-700 to-gray-800 text-white",
                                 "hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed",
-                                "shadow-lg shadow-blue-500/25"
+                                "shadow-lg shadow-gray-900/50 border border-gray-600"
                             )}
                         >
                             Join Game
@@ -84,8 +84,8 @@ export function Lobby({
                                 onClick={onFindGame}
                                 className={cn(
                                     "w-full py-4 rounded-xl font-semibold text-lg transition-all",
-                                    "bg-gradient-to-r from-green-500 to-emerald-500 text-white",
-                                    "hover:opacity-90 shadow-lg shadow-green-500/25"
+                                    "bg-gradient-to-r from-gray-700 to-gray-800 text-white",
+                                    "hover:opacity-90 shadow-lg shadow-gray-900/50 border border-gray-600"
                                 )}
                             >
                                 🎮 Find Game
@@ -96,7 +96,7 @@ export function Lobby({
                                     <motion.div
                                         animate={{ rotate: 360 }}
                                         transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                                        className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full"
+                                        className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full"
                                     />
                                     <span className="text-lg text-gray-300">Searching for opponent...</span>
                                 </div>
@@ -116,8 +116,8 @@ export function Lobby({
             </AnimatePresence>
 
             {!connected && (
-                <div className="flex items-center gap-2 text-yellow-500">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
+                <div className="flex items-center gap-2 text-emerald-500">
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
                     <span className="text-sm">Connecting to server...</span>
                 </div>
             )}
