@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useWebSocket } from './hooks/useWebSocket';
 import { Lobby } from './components/Lobby';
 import { GameBoard } from './components/GameBoard';
+import { GameResult as GameResultModal } from './components/GameResult';
 
 type Cell = 0 | 1 | 2;
 type Board = Cell[][];
@@ -29,6 +30,7 @@ function App() {
     const [username, setUsername] = useState('');
     const [gameData, setGameData] = useState<GameData | null>(null);
     const [gameResult, setGameResult] = useState<GameResult | null>(null);
+    const [showResult, setShowResult] = useState(false);
 
     useEffect(() => {
         if (!lastMessage) return;
@@ -49,6 +51,7 @@ function App() {
             case 'gameStart':
                 setGameState('playing');
                 setGameResult(null);
+                setShowResult(false);
                 setGameData({
                     gameId: lastMessage.gameId,
                     board: lastMessage.board,
@@ -76,6 +79,7 @@ function App() {
                     winningCells: lastMessage.winningCells || [],
                     duration: lastMessage.duration || 0,
                 });
+                setTimeout(() => setShowResult(true), 1500);
                 break;
 
             case 'reconnected':
@@ -168,24 +172,15 @@ function App() {
                         disabled={gameState === 'gameOver'}
                     />
 
-                    {gameState === 'gameOver' && gameResult && (
-                        <div className="mt-6 text-center space-y-4">
-                            <h2 className={`text-3xl font-bold ${gameResult.winner === username ? 'text-green-400' :
-                                    gameResult.winner === null ? 'text-yellow-400' : 'text-red-400'
-                                }`}>
-                                {gameResult.winner === username ? '🎉 You Win!' :
-                                    gameResult.winner === null ? '🤝 Draw!' : '😔 You Lose'}
-                            </h2>
-                            <p className="text-gray-400">
-                                Game lasted {gameResult.duration} seconds
-                            </p>
-                            <button
-                                onClick={handlePlayAgain}
-                                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-lg hover:opacity-90 transition-opacity"
-                            >
-                                Play Again
-                            </button>
-                        </div>
+                    {gameState === 'gameOver' && showResult && gameResult && gameData && (
+                        <GameResultModal
+                            winner={gameResult.winner}
+                            username={username}
+                            opponent={gameData.opponent}
+                            result={gameResult.result}
+                            duration={gameResult.duration}
+                            onPlayAgain={handlePlayAgain}
+                        />
                     )}
                 </div>
             )}
