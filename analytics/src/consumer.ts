@@ -1,4 +1,5 @@
 import { Kafka, Consumer, EachMessagePayload, logLevel } from 'kafkajs';
+import { analyticsDB } from './db.js';
 
 const KAFKA_BROKER = process.env.KAFKA_BROKER || 'localhost:9092';
 const GROUP_ID = 'nexus4-analytics';
@@ -9,6 +10,12 @@ interface GameEvent {
     gameId: string;
     timestamp: number;
     data: Record<string, any>;
+}
+
+interface ActiveGameData {
+    startTime: number;
+    moves: number;
+    isBotGame: boolean;
 }
 
 interface GameStats {
@@ -23,7 +30,7 @@ class AnalyticsConsumer {
     private kafka: Kafka;
     private consumer: Consumer;
     private stats: GameStats;
-    private activeGames: Map<string, { startTime: number; moves: number }>;
+    private activeGames: Map<string, ActiveGameData>;
 
     constructor() {
         this.kafka = new Kafka({
@@ -48,6 +55,7 @@ class AnalyticsConsumer {
 
     async start(): Promise<void> {
         try {
+            await analyticsDB.connect();
             await this.consumer.connect();
             console.log('✅ Kafka consumer connected');
 
@@ -86,11 +94,12 @@ class AnalyticsConsumer {
                 this.activeGames.set(event.gameId, {
                     startTime: event.timestamp,
                     moves: 0,
+                    isBotGame: event.data.isBotGame || false,
                 });
-                this.stats.gamesPerHour.set(
-                    hour,
-                    (this.stats.gamesPerHour.get(hour) || 0) + 1
-                );
+                this.stats.gamesPerHour.set(hour, (this.stats.gamesPerHour.get(hour) || 0) + 1);
+
+                await analyticsDB.incrementHourlyActivity(timestamp);
+
                 console.log(`🎮 Game started: ${event.gameId}`);
                 console.log(`   Players: ${event.data.player1} vs ${event.data.player2}`);
                 break;
@@ -110,6 +119,14 @@ class AnalyticsConsumer {
                     const duration = event.data.duration ||
                         Math.floor((event.timestamp - game.startTime) / 1000);
                     this.stats.totalDuration += duration;
+
+                    await analyticsDB.incrementDailyStats(
+                        timestamp,
+                        game.moves,
+                        duration,
+                        game.isBotGame
+                    );
+
                     this.activeGames.delete(event.gameId);
                 }
 
@@ -142,7 +159,7 @@ class AnalyticsConsumer {
             ? Math.round(this.stats.totalMoves / this.stats.totalGames)
             : 0;
 
-        console.log('\n📊 Current Stats:');
+        console.log('\n📊 Session Stats:');
         console.log(`   Total Games: ${this.stats.totalGames}`);
         console.log(`   Total Moves: ${this.stats.totalMoves}`);
         console.log(`   Avg Duration: ${avgDuration}s`);
@@ -162,6 +179,7 @@ class AnalyticsConsumer {
 
     async stop(): Promise<void> {
         await this.consumer.disconnect();
+        await analyticsDB.disconnect();
         console.log('🔌 Consumer disconnected');
     }
 }
