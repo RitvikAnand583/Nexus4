@@ -27,18 +27,18 @@ export function GameBoard({
         winningCells.some(([r, c]) => r === row && c === col);
 
     return (
-        <div className="flex flex-col items-center gap-6">
+        <div className="flex flex-col items-center gap-4 md:gap-6">
             <div className="relative">
                 <div className="absolute -inset-1 bg-gradient-to-r from-emerald-600/30 to-gray-700/30 rounded-3xl blur-sm" />
-                <div className="relative bg-gradient-to-b from-gray-800 to-gray-900 p-3 rounded-2xl border border-gray-700 shadow-2xl">
-                    <div className="grid grid-cols-7 gap-2">
+                <div className="relative bg-gradient-to-b from-gray-800 to-gray-900 p-2 md:p-3 rounded-2xl border border-gray-700 shadow-2xl">
+                    <div className="grid grid-cols-7 gap-1 md:gap-2">
                         {Array.from({ length: 7 }).map((_, col) => (
                             <button
                                 key={col}
                                 onClick={() => !disabled && isYourTurn && onColumnClick(col)}
                                 disabled={disabled || !isYourTurn}
                                 className={cn(
-                                    "flex flex-col gap-2 p-1 rounded-xl transition-all duration-200",
+                                    "flex flex-col gap-1 md:gap-2 p-0.5 md:p-1 rounded-xl transition-all duration-200",
                                     isYourTurn && !disabled && "hover:bg-emerald-900/30 cursor-pointer",
                                     (!isYourTurn || disabled) && "cursor-not-allowed"
                                 )}
@@ -50,7 +50,7 @@ export function GameBoard({
                                         animate={{ y: 0, opacity: 1 }}
                                         transition={{ type: "spring", stiffness: 400, damping: 25 }}
                                         className={cn(
-                                            "w-14 h-14 rounded-full transition-all duration-200",
+                                            "w-10 h-10 md:w-14 md:h-14 rounded-full transition-all duration-200",
                                             row[col] === 0 && "bg-gray-950 border-2 border-gray-800 shadow-inner",
                                             row[col] === 1 && "bg-gradient-to-br from-emerald-400 to-emerald-600 border-2 border-emerald-300 shadow-lg shadow-emerald-500/40",
                                             row[col] === 2 && "bg-gradient-to-br from-gray-300 to-gray-500 border-2 border-gray-200 shadow-lg shadow-gray-400/40",

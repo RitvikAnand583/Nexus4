@@ -137,8 +137,8 @@ function App() {
     const isYourTurn = gameData ? gameData.currentPlayer === gameData.yourPlayer : false;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-emerald-900 to-gray-900 flex flex-col items-center justify-center p-8">
-            <h1 className="text-6xl md:text-7xl font-bold mb-8 text-gray-400">
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-emerald-900 to-gray-900 flex flex-col items-center justify-center p-4 md:p-8">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-4 md:mb-8 text-gray-400">
                 Nexus4
             </h1>
 

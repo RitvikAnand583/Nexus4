@@ -78,7 +78,7 @@ export function GameResult({
                 initial={{ y: 50 }}
                 animate={!isWin && !isDraw ? 'shake' : { y: 0 }}
                 variants={shakeVariants}
-                className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 max-w-md w-full shadow-2xl border border-gray-700 relative"
+                className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-4 md:p-8 max-w-md w-full shadow-2xl border border-gray-700 relative"
             >
                 <motion.div
                     initial={{ scale: 0 }}

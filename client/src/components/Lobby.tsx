@@ -31,7 +31,7 @@ export function Lobby({
     };
 
     return (
-        <div className="flex flex-col items-center gap-8 w-full max-w-md">
+        <div className="flex flex-col items-center gap-4 md:gap-8 w-full max-w-md px-4 md:px-0">
             <AnimatePresence mode="wait">
                 {!isJoined ? (
                     <motion.form
