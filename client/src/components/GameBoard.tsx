@@ -92,14 +92,21 @@ export function GameBoard({
                 </div>
             </div>
 
-            <p className={cn(
-                "text-sm font-medium px-4 py-2 rounded-full transition-all",
-                isYourTurn
-                    ? "bg-gray-700/50 text-white border border-gray-600"
-                    : "bg-gray-800/50 text-gray-400 border border-gray-700"
-            )}>
-                {isYourTurn ? "Your turn" : "Waiting..."}
-            </p>
+            <motion.div
+                animate={isYourTurn ? {
+                    scale: [1, 1.05, 1],
+                    boxShadow: ['0 0 0 0 rgba(16, 185, 129, 0)', '0 0 20px 10px rgba(16, 185, 129, 0.3)', '0 0 0 0 rgba(16, 185, 129, 0)']
+                } : {}}
+                transition={{ duration: 1.5, repeat: Infinity }}
+                className={cn(
+                    "px-6 py-3 rounded-2xl font-semibold text-lg transition-all",
+                    isYourTurn
+                        ? "bg-gradient-to-r from-emerald-600 to-emerald-700 text-white border-2 border-emerald-400"
+                        : "bg-gray-800/50 text-gray-400 border border-gray-700"
+                )}
+            >
+                {isYourTurn ? "🎯 Your Turn!" : "⏳ Waiting..."}
+            </motion.div>
         </div>
     );
 }

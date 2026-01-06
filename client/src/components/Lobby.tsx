@@ -57,7 +57,7 @@ export function Lobby({
                             type="submit"
                             disabled={!inputValue.trim() || !connected}
                             className={cn(
-                                "w-full py-4 rounded-xl font-semibold text-lg transition-all",
+                                "w-full py-4 rounded-xl font-semibold text-lg transition-all cursor-pointer",
                                 "bg-gradient-to-r from-gray-700 to-gray-800 text-white",
                                 "hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed",
                                 "shadow-lg shadow-gray-900/50 border border-gray-600"
@@ -72,24 +72,25 @@ export function Lobby({
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className="w-full space-y-6 text-center"
+                        className="w-full text-center"
                     >
-                        <div className="p-4 bg-gray-800/50 rounded-xl border border-gray-700">
-                            <p className="text-gray-400 text-sm">Playing as</p>
-                            <p className="text-2xl font-bold text-white">{username}</p>
-                        </div>
-
                         {!isSearching ? (
-                            <button
-                                onClick={onFindGame}
-                                className={cn(
-                                    "w-full py-4 rounded-xl font-semibold text-lg transition-all",
-                                    "bg-gradient-to-r from-gray-700 to-gray-800 text-white",
-                                    "hover:opacity-90 shadow-lg shadow-gray-900/50 border border-gray-600"
-                                )}
-                            >
-                                🎮 Find Game
-                            </button>
+                            <div className="flex flex-col items-center justify-center gap-4">
+                                <div className="px-4 py-2 bg-gray-800/50 rounded-xl border border-gray-700 flex flex-col items-center min-w-56">
+                                    <span className="text-gray-200 text-lg">Playing as</span>
+                                    <span className="text-2xl font-bold text-white">{username}</span>
+                                </div>
+                                <button
+                                    onClick={onFindGame}
+                                    className={cn(
+                                        "px-8 py-3 rounded-xl font-semibold text-base transition-all cursor-pointer",
+                                        "bg-gradient-to-r from-gray-700 to-gray-800 text-white text-2xl",
+                                        "hover:opacity-90 shadow-lg shadow-gray-900/50 border border-gray-600"
+                                    )}
+                                >
+                                    Play
+                                </button>
+                            </div>
                         ) : (
                             <div className="space-y-4">
                                 <div className="flex items-center justify-center gap-3">

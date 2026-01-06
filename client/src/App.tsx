@@ -3,6 +3,7 @@ import { useWebSocket } from './hooks/useWebSocket';
 import { Lobby } from './components/Lobby';
 import { GameBoard } from './components/GameBoard';
 import { GameResult as GameResultModal } from './components/GameResult';
+import { HowToPlay } from './components/HowToPlay';
 
 type Cell = 0 | 1 | 2;
 type Board = Cell[][];
@@ -186,6 +187,7 @@ function App() {
                     )}
                 </div>
             )}
+            {(gameState === 'playing' || gameState === 'gameOver') && <HowToPlay />}
         </div>
     );
 }

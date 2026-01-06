@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { cn } from '../lib/utils';
+import { useEffect, useState } from 'react';
 
 interface GameResultProps {
     winner: string | null;
@@ -8,6 +9,13 @@ interface GameResultProps {
     result: 'win' | 'draw' | 'forfeit';
     duration: number;
     onPlayAgain: () => void;
+}
+
+interface Confetti {
+    id: number;
+    x: number;
+    delay: number;
+    color: string;
 }
 
 export function GameResult({
@@ -21,6 +29,20 @@ export function GameResult({
     const isWin = winner === username;
     const isDraw = winner === null && result === 'draw';
     const isForfeit = result === 'forfeit';
+    const [confetti, setConfetti] = useState<Confetti[]>([]);
+
+    useEffect(() => {
+        if (isWin) {
+            const colors = ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#fff'];
+            const newConfetti = Array.from({ length: 50 }, (_, i) => ({
+                id: i,
+                x: Math.random() * 100,
+                delay: Math.random() * 0.5,
+                color: colors[Math.floor(Math.random() * colors.length)],
+            }));
+            setConfetti(newConfetti);
+        }
+    }, [isWin]);
 
     const formatDuration = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
@@ -28,16 +50,35 @@ export function GameResult({
         return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
     };
 
+    const shakeVariants = {
+        shake: {
+            x: [0, -10, 10, -10, 10, -5, 5, 0],
+            transition: { duration: 0.5 }
+        }
+    };
+
     return (
         <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-hidden"
         >
+            {isWin && confetti.map((c) => (
+                <motion.div
+                    key={c.id}
+                    initial={{ y: -20, x: `${c.x}vw`, opacity: 1 }}
+                    animate={{ y: '100vh', opacity: 0 }}
+                    transition={{ duration: 2 + Math.random(), delay: c.delay, ease: 'linear' }}
+                    className="fixed top-0 w-3 h-3 rounded-sm"
+                    style={{ backgroundColor: c.color, left: 0 }}
+                />
+            ))}
+
             <motion.div
                 initial={{ y: 50 }}
-                animate={{ y: 0 }}
-                className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 max-w-md w-full shadow-2xl border border-gray-700"
+                animate={!isWin && !isDraw ? 'shake' : { y: 0 }}
+                variants={shakeVariants}
+                className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 max-w-md w-full shadow-2xl border border-gray-700 relative"
             >
                 <motion.div
                     initial={{ scale: 0 }}
@@ -45,9 +86,16 @@ export function GameResult({
                     transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
                     className="text-center mb-6"
                 >
-                    <span className="text-6xl">
+                    <motion.span
+                        className="text-6xl inline-block"
+                        animate={isWin ? {
+                            rotate: [0, -10, 10, -10, 10, 0],
+                            scale: [1, 1.1, 1]
+                        } : {}}
+                        transition={{ duration: 0.5, delay: 0.3 }}
+                    >
                         {isWin ? '🏆' : isDraw ? '🤝' : '😔'}
-                    </span>
+                    </motion.span>
                 </motion.div>
 
                 <h2 className={cn(
