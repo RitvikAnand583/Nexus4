@@ -101,7 +101,7 @@ export function GameResult({
                     className="mt-4 text-center"
                 >
                     <p className="text-gray-500 text-sm">
-                        {isWin ? '+1 Win' : isDraw ? '+1 Draw' : '+1 Loss'} added to your stats
+                        {isWin ? 'Win +1' : isDraw ? 'Draw 0' : 'Loss -1'} recorded
                     </p>
                 </motion.div>
             </motion.div>

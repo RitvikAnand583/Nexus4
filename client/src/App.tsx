@@ -25,7 +25,7 @@ interface GameResult {
 }
 
 function App() {
-    const { connected, lastMessage, send } = useWebSocket();
+    const { connected, lastMessage, send, setStoredUsername, clearStoredUsername } = useWebSocket();
     const [gameState, setGameState] = useState<GameState>('lobby');
     const [username, setUsername] = useState('');
     const [gameData, setGameData] = useState<GameData | null>(null);
@@ -108,6 +108,7 @@ function App() {
 
     const handleJoin = (name: string) => {
         send({ type: 'join', username: name });
+        setStoredUsername(name);
         setUsername(name);
     };
 
@@ -126,6 +127,7 @@ function App() {
     };
 
     const handlePlayAgain = () => {
+        clearStoredUsername();
         setGameState('lobby');
         setGameData(null);
         setGameResult(null);

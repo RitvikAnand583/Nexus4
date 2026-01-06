@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 const WS_URL = 'ws://localhost:3001';
+const USERNAME_KEY = 'nexus4_username';
 
 interface ServerMessage {
     type: string;
@@ -14,6 +15,18 @@ export function useWebSocket() {
     const wsRef = useRef<WebSocket | null>(null);
     const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+    const getStoredUsername = useCallback((): string | null => {
+        return localStorage.getItem(USERNAME_KEY);
+    }, []);
+
+    const setStoredUsername = useCallback((username: string | null) => {
+        if (username) {
+            localStorage.setItem(USERNAME_KEY, username);
+        } else {
+            localStorage.removeItem(USERNAME_KEY);
+        }
+    }, []);
+
     const connect = useCallback(() => {
         if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
@@ -23,6 +36,12 @@ export function useWebSocket() {
             setConnected(true);
             setReconnecting(false);
             console.log('WebSocket connected');
+
+            const storedUsername = getStoredUsername();
+            if (storedUsername) {
+                console.log(`Attempting to rejoin as ${storedUsername}`);
+                ws.send(JSON.stringify({ type: 'rejoin', username: storedUsername }));
+            }
         };
 
         ws.onclose = () => {
@@ -48,7 +67,7 @@ export function useWebSocket() {
         };
 
         wsRef.current = ws;
-    }, []);
+    }, [getStoredUsername]);
 
     useEffect(() => {
         connect();
@@ -67,5 +86,9 @@ export function useWebSocket() {
         }
     }, []);
 
-    return { connected, reconnecting, lastMessage, send };
+    const clearStoredUsername = useCallback(() => {
+        setStoredUsername(null);
+    }, [setStoredUsername]);
+
+    return { connected, reconnecting, lastMessage, send, setStoredUsername, clearStoredUsername, getStoredUsername };
 }
