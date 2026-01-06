@@ -13,7 +13,7 @@ export function useWebSocket() {
     const [reconnecting, setReconnecting] = useState(false);
     const [lastMessage, setLastMessage] = useState<ServerMessage | null>(null);
     const wsRef = useRef<WebSocket | null>(null);
-    const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const getStoredUsername = useCallback((): string | null => {
         return localStorage.getItem(USERNAME_KEY);
