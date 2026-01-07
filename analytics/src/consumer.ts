@@ -2,7 +2,7 @@ import { Kafka, Consumer, EachMessagePayload, logLevel } from 'kafkajs';
 import { analyticsDB } from './db.js';
 
 const KAFKA_BROKER = process.env.KAFKA_BROKER || 'localhost:9092';
-const GROUP_ID = 'nexus4-analytics';
+const GROUP_ID = 'Nxus-analytics';
 const TOPIC = 'game-events';
 
 interface GameEvent {
@@ -34,7 +34,7 @@ class AnalyticsConsumer {
 
     constructor() {
         this.kafka = new Kafka({
-            clientId: 'nexus4-analytics',
+            clientId: 'Nxus-analytics',
             brokers: [KAFKA_BROKER],
             logLevel: logLevel.ERROR,
             retry: {
@@ -194,7 +194,7 @@ process.on('SIGINT', async () => {
 
 console.log(`
 ╔═══════════════════════════════════════════════════════╗
-║        📊 Nexus4 Analytics Consumer 📊                ║
+║        📊 Nxus Analytics Consumer 📊                ║
 ╠═══════════════════════════════════════════════════════╣
 ║  Kafka Broker: ${KAFKA_BROKER.padEnd(35)}   ║
 ║  Topic: ${TOPIC.padEnd(43)}   ║

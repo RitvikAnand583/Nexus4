@@ -1,4 +1,4 @@
-# Four in a Row - Real-Time Multiplayer Game
+# Nxus - Real-Time Multiplayer Game
 
 A real-time multiplayer Connect Four game with competitive AI bot, WebSocket communication, and Kafka analytics.
 
@@ -6,9 +6,21 @@ A real-time multiplayer Connect Four game with competitive AI bot, WebSocket com
 
 - **Real-time Multiplayer**: Play against other players via WebSocket
 - **Competitive AI Bot**: Minimax with alpha-beta pruning (joins after 10s if no opponent)
+- **🎤 Voice Chat**: WebRTC-based voice communication with opponent
 - **Reconnection Support**: Rejoin games within 30 seconds if disconnected
 - **Leaderboard**: Track wins, losses, and rankings
 - **Analytics**: Kafka-powered game metrics tracking
+
+## 🎤 Voice Chat
+
+During games against human players, you can initiate voice chat:
+
+1. Click the **🎤 Voice** button
+2. Your opponent sees an accept/decline popup (15 second timer)
+3. If accepted, both players grant microphone access
+4. Voice connected! Mute/unmute anytime during the game
+
+**Note:** Voice chat uses WebRTC with STUN servers for peer-to-peer audio.
 
 ## 🚀 Quick Start
 
@@ -99,6 +111,10 @@ four-in-row/
 - `findGame` - Enter matchmaking queue
 - `cancelQueue` - Leave matchmaking queue
 - `move` - Make a move (column number)
+- `voice_request` - Request voice chat
+- `voice_accept` - Accept voice chat
+- `voice_decline` - Decline voice chat
+- `rtc_offer` / `rtc_answer` / `rtc_ice_candidate` - WebRTC signaling
 
 ### Server → Client
 - `joined` - Successfully joined
@@ -108,3 +124,4 @@ four-in-row/
 - `gameOver` - Game ended
 - `opponentDisconnected` - Opponent disconnected
 - `opponentReconnected` - Opponent returned
+- `voice_request` / `voice_accept` / `voice_decline` - Voice chat signals
