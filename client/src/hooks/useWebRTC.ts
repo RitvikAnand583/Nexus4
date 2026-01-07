@@ -54,22 +54,41 @@ export function useWebRTC({ onRemoteStream, sendSignal }: UseWebRTCOptions) {
         audio.autoplay = true;
         audio.setAttribute('playsinline', 'true');
         audio.setAttribute('webkit-playsinline', 'true');
-        // iOS requires these
+        // Android Chrome needs these
+        audio.setAttribute('preload', 'auto');
+        audio.crossOrigin = 'anonymous';
+        // Ensure audio is not muted
         audio.muted = false;
         audio.volume = 1.0;
         audio.style.display = 'none';
         document.body.appendChild(audio);
         remoteAudioRef.current = audio;
 
-        // iOS Safari needs user interaction - try unmuting on first touch
-        const unlockAudio = () => {
-            if (audio.paused && audio.srcObject) {
+        // Mobile browsers need user interaction to play audio
+        const unlockAudio = async () => {
+            // Resume AudioContext for Android Chrome
+            const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+            if (AudioContext) {
+                const ctx = new AudioContext();
+                if (ctx.state === 'suspended') {
+                    await ctx.resume();
+                    console.log('🔊 AudioContext resumed');
+                }
+            }
+
+            // Try to play the audio
+            if (audio.srcObject) {
+                audio.muted = false;
                 audio.play().catch(() => { });
             }
+
             document.removeEventListener('touchstart', unlockAudio);
+            document.removeEventListener('touchend', unlockAudio);
             document.removeEventListener('click', unlockAudio);
         };
+
         document.addEventListener('touchstart', unlockAudio, { once: true });
+        document.addEventListener('touchend', unlockAudio, { once: true });
         document.addEventListener('click', unlockAudio, { once: true });
 
         return () => {
@@ -79,6 +98,7 @@ export function useWebRTC({ onRemoteStream, sendSignal }: UseWebRTCOptions) {
                 document.body.removeChild(audio);
             }
             document.removeEventListener('touchstart', unlockAudio);
+            document.removeEventListener('touchend', unlockAudio);
             document.removeEventListener('click', unlockAudio);
         };
     }, []);
