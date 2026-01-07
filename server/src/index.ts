@@ -100,19 +100,24 @@ wsHandler.onMessage('voice_decline', (ws, msg) => {
 
 // WebRTC Signaling
 wsHandler.onMessage('rtc_offer', (ws, msg) => {
+    console.log(`📡 RTC offer from ${ws.username}`);
     if (ws.username) {
         const opponentWs = gameState.getOpponentWebSocket(ws.username);
+        console.log(`📡 Forwarding offer to: ${opponentWs?.username || 'NOT FOUND'}`);
         if (opponentWs) {
             wsHandler.send(opponentWs, { type: 'rtc_offer', offer: msg.offer });
+            console.log(`📡 RTC offer sent to ${opponentWs.username}`);
         }
     }
 });
 
 wsHandler.onMessage('rtc_answer', (ws, msg) => {
+    console.log(`📡 RTC answer from ${ws.username}`);
     if (ws.username) {
         const opponentWs = gameState.getOpponentWebSocket(ws.username);
         if (opponentWs) {
             wsHandler.send(opponentWs, { type: 'rtc_answer', answer: msg.answer });
+            console.log(`📡 RTC answer sent to ${opponentWs.username}`);
         }
     }
 });
