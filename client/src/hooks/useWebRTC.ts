@@ -30,27 +30,41 @@ export function useWebRTC({ onRemoteStream, sendSignal }: UseWebRTCOptions) {
 
     // Create audio element for remote playback
     useEffect(() => {
-        const audio = new Audio();
+        const audio = document.createElement('audio');
         audio.autoplay = true;
+        audio.setAttribute('playsinline', 'true');
+        audio.style.display = 'none';
+        document.body.appendChild(audio);
         remoteAudioRef.current = audio;
 
         return () => {
             audio.pause();
             audio.srcObject = null;
+            document.body.removeChild(audio);
         };
     }, []);
 
-    // Get local microphone stream
+    // Get local microphone stream with high quality settings
     const getLocalStream = useCallback(async () => {
         try {
+            console.log('🎤 Requesting microphone access...');
             const stream = await navigator.mediaDevices.getUserMedia({
-                audio: true,
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true,
+                    // High quality settings
+                    sampleRate: 48000,
+                    sampleSize: 16,
+                    channelCount: 1, // Mono is better for voice
+                },
                 video: false
             });
+            console.log('🎤 Microphone access granted!');
             localStreamRef.current = stream;
             return stream;
         } catch (err) {
-            console.error('Failed to get microphone:', err);
+            console.error('❌ Failed to get microphone:', err);
             setError('Microphone access denied');
             return null;
         }
@@ -58,29 +72,41 @@ export function useWebRTC({ onRemoteStream, sendSignal }: UseWebRTCOptions) {
 
     // Create peer connection
     const createPeerConnection = useCallback(() => {
+        console.log('📡 Creating peer connection...');
         const pc = new RTCPeerConnection(ICE_SERVERS);
 
         pc.onicecandidate = (event) => {
             if (event.candidate) {
+                console.log('🧊 Sending ICE candidate');
                 sendSignal('rtc_ice_candidate', { candidate: event.candidate });
             }
         };
 
         pc.ontrack = (event) => {
-            console.log('Received remote track');
+            console.log('🔊 Received remote audio track!');
             if (remoteAudioRef.current && event.streams[0]) {
                 remoteAudioRef.current.srcObject = event.streams[0];
+                // Try to play (may need user interaction)
+                remoteAudioRef.current.play().catch(err => {
+                    console.warn('⚠️ Audio autoplay blocked:', err);
+                });
                 onRemoteStream?.(event.streams[0]);
             }
         };
 
         pc.onconnectionstatechange = () => {
-            console.log('Connection state:', pc.connectionState);
+            console.log('📶 Connection state:', pc.connectionState);
             if (pc.connectionState === 'connected') {
+                console.log('✅ WebRTC connected!');
                 setIsConnected(true);
             } else if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
+                console.log('❌ WebRTC disconnected');
                 setIsConnected(false);
             }
+        };
+
+        pc.oniceconnectionstatechange = () => {
+            console.log('🧊 ICE state:', pc.iceConnectionState);
         };
 
         peerConnectionRef.current = pc;
