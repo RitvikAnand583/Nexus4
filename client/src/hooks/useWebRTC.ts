@@ -48,19 +48,38 @@ export function useWebRTC({ onRemoteStream, sendSignal }: UseWebRTCOptions) {
     const [isMuted, setIsMuted] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-
+    // Create audio element for remote playback (mobile-compatible)
     useEffect(() => {
         const audio = document.createElement('audio');
         audio.autoplay = true;
         audio.setAttribute('playsinline', 'true');
+        audio.setAttribute('webkit-playsinline', 'true');
+        // iOS requires these
+        audio.muted = false;
+        audio.volume = 1.0;
         audio.style.display = 'none';
         document.body.appendChild(audio);
         remoteAudioRef.current = audio;
 
+        // iOS Safari needs user interaction - try unmuting on first touch
+        const unlockAudio = () => {
+            if (audio.paused && audio.srcObject) {
+                audio.play().catch(() => { });
+            }
+            document.removeEventListener('touchstart', unlockAudio);
+            document.removeEventListener('click', unlockAudio);
+        };
+        document.addEventListener('touchstart', unlockAudio, { once: true });
+        document.addEventListener('click', unlockAudio, { once: true });
+
         return () => {
             audio.pause();
             audio.srcObject = null;
-            document.body.removeChild(audio);
+            if (audio.parentNode) {
+                document.body.removeChild(audio);
+            }
+            document.removeEventListener('touchstart', unlockAudio);
+            document.removeEventListener('click', unlockAudio);
         };
     }, []);
 
@@ -105,11 +124,31 @@ export function useWebRTC({ onRemoteStream, sendSignal }: UseWebRTCOptions) {
         pc.ontrack = (event) => {
             console.log('🔊 Received remote audio track!');
             if (remoteAudioRef.current && event.streams[0]) {
-                remoteAudioRef.current.srcObject = event.streams[0];
-                // Try to play (may need user interaction)
-                remoteAudioRef.current.play().catch(err => {
-                    console.warn('⚠️ Audio autoplay blocked:', err);
-                });
+                const audio = remoteAudioRef.current;
+                audio.srcObject = event.streams[0];
+                audio.muted = false;
+                audio.volume = 1.0;
+
+                // Try to play immediately
+                const tryPlay = () => {
+                    audio.play()
+                        .then(() => console.log('🔊 Audio playing!'))
+                        .catch(err => {
+                            console.warn('⚠️ Audio autoplay blocked, waiting for user interaction:', err.message);
+                        });
+                };
+
+                tryPlay();
+
+                // Also try on any user interaction
+                const playOnInteraction = () => {
+                    tryPlay();
+                    document.removeEventListener('touchstart', playOnInteraction);
+                    document.removeEventListener('click', playOnInteraction);
+                };
+                document.addEventListener('touchstart', playOnInteraction, { once: true });
+                document.addEventListener('click', playOnInteraction, { once: true });
+
                 onRemoteStream?.(event.streams[0]);
             }
         };
