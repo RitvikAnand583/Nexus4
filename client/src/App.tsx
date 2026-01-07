@@ -4,6 +4,9 @@ import { Lobby } from './components/Lobby';
 import { GameBoard } from './components/GameBoard';
 import { GameResult as GameResultModal } from './components/GameResult';
 import { HowToPlay } from './components/HowToPlay';
+import { VoiceChat } from './components/VoiceChat';
+
+type VoiceChatState = 'idle' | 'requesting' | 'incoming' | 'connected' | 'declined';
 
 type Cell = 0 | 1 | 2;
 type Board = Cell[][];
@@ -32,6 +35,8 @@ function App() {
     const [gameData, setGameData] = useState<GameData | null>(null);
     const [gameResult, setGameResult] = useState<GameResult | null>(null);
     const [showResult, setShowResult] = useState(false);
+    const [voiceChatState, setVoiceChatState] = useState<VoiceChatState>('idle');
+    const [isMuted, setIsMuted] = useState(false);
 
     useEffect(() => {
         if (!lastMessage) return;
@@ -101,6 +106,19 @@ function App() {
             case 'opponentReconnected':
                 break;
 
+            case 'voice_request':
+                setVoiceChatState('incoming');
+                break;
+
+            case 'voice_accept':
+                setVoiceChatState('connected');
+                break;
+
+            case 'voice_decline':
+                setVoiceChatState('declined');
+                setTimeout(() => setVoiceChatState('idle'), 3000);
+                break;
+
             case 'error':
                 console.error('Server error:', lastMessage.message);
                 break;
@@ -132,6 +150,27 @@ function App() {
         setGameState('lobby');
         setGameData(null);
         setGameResult(null);
+        setVoiceChatState('idle');
+        setIsMuted(false);
+    };
+
+    const handleVoiceRequest = () => {
+        send({ type: 'voice_request' });
+        setVoiceChatState('requesting');
+    };
+
+    const handleVoiceAccept = () => {
+        send({ type: 'voice_accept' });
+        setVoiceChatState('connected');
+    };
+
+    const handleVoiceDecline = () => {
+        send({ type: 'voice_decline' });
+        setVoiceChatState('idle');
+    };
+
+    const handleToggleMute = () => {
+        setIsMuted(!isMuted);
     };
 
     const isYourTurn = gameData ? gameData.currentPlayer === gameData.yourPlayer : false;
@@ -174,6 +213,21 @@ function App() {
                         winningCells={gameResult?.winningCells || []}
                         disabled={gameState === 'gameOver'}
                     />
+
+                    {/* Voice Chat - near turn indicator */}
+                    {!gameData.isOpponentBot && gameState === 'playing' && (
+                        <div className="mt-2">
+                            <VoiceChat
+                                opponent={gameData.opponent}
+                                state={voiceChatState}
+                                isMuted={isMuted}
+                                onRequest={handleVoiceRequest}
+                                onAccept={handleVoiceAccept}
+                                onDecline={handleVoiceDecline}
+                                onToggleMute={handleToggleMute}
+                            />
+                        </div>
+                    )}
 
                     {gameState === 'gameOver' && showResult && gameResult && gameData && (
                         <GameResultModal

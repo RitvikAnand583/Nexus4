@@ -227,6 +227,16 @@ class GameStateManager {
         return null;
     }
 
+    getOpponentWebSocket(username: string): GameWebSocket | null {
+        const game = matchmaking.getGameByPlayer(username);
+        if (!game) return null;
+
+        const opponentName = game.player1 === username ? game.player2 : game.player1;
+        if (!opponentName || opponentName.startsWith('Bot_') || opponentName === 'Bot') return null;
+
+        return wsHandler.getSocketByUsername(opponentName) || null;
+    }
+
     private async persistGame(game: ActiveGame, winner: string | null, result: 'win' | 'draw' | 'forfeit', duration: number): Promise<void> {
         await db.saveGame({
             id: game.id,

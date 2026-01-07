@@ -3,10 +3,15 @@ import { Server } from 'http';
 import { v4 as uuidv4 } from 'uuid';
 
 interface ClientMessage {
-    type: 'join' | 'findGame' | 'cancelQueue' | 'move' | 'rejoin' | '_disconnect';
+    type: 'join' | 'findGame' | 'cancelQueue' | 'move' | 'rejoin' | '_disconnect' |
+    'voice_request' | 'voice_accept' | 'voice_decline' |
+    'rtc_offer' | 'rtc_answer' | 'rtc_ice_candidate';
     username?: string;
     column?: number;
     gameId?: string;
+    offer?: any;
+    answer?: any;
+    candidate?: any;
 }
 
 interface ServerMessage {

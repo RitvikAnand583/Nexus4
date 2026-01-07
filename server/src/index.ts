@@ -67,6 +67,65 @@ wsHandler.onMessage('_disconnect', (ws, msg) => {
     }
 });
 
+// Voice Chat Signaling
+wsHandler.onMessage('voice_request', (ws, msg) => {
+    console.log(`🎤 Voice request from ${ws.username}`);
+    if (ws.username) {
+        const opponentWs = gameState.getOpponentWebSocket(ws.username);
+        console.log(`🎤 Opponent socket found: ${opponentWs ? opponentWs.username : 'null'}`);
+        if (opponentWs) {
+            wsHandler.send(opponentWs, { type: 'voice_request', from: ws.username });
+            console.log(`🎤 Voice request sent to ${opponentWs.username}`);
+        }
+    }
+});
+
+wsHandler.onMessage('voice_accept', (ws, msg) => {
+    if (ws.username) {
+        const opponentWs = gameState.getOpponentWebSocket(ws.username);
+        if (opponentWs) {
+            wsHandler.send(opponentWs, { type: 'voice_accept', from: ws.username });
+        }
+    }
+});
+
+wsHandler.onMessage('voice_decline', (ws, msg) => {
+    if (ws.username) {
+        const opponentWs = gameState.getOpponentWebSocket(ws.username);
+        if (opponentWs) {
+            wsHandler.send(opponentWs, { type: 'voice_decline', from: ws.username });
+        }
+    }
+});
+
+// WebRTC Signaling
+wsHandler.onMessage('rtc_offer', (ws, msg) => {
+    if (ws.username) {
+        const opponentWs = gameState.getOpponentWebSocket(ws.username);
+        if (opponentWs) {
+            wsHandler.send(opponentWs, { type: 'rtc_offer', offer: msg.offer });
+        }
+    }
+});
+
+wsHandler.onMessage('rtc_answer', (ws, msg) => {
+    if (ws.username) {
+        const opponentWs = gameState.getOpponentWebSocket(ws.username);
+        if (opponentWs) {
+            wsHandler.send(opponentWs, { type: 'rtc_answer', answer: msg.answer });
+        }
+    }
+});
+
+wsHandler.onMessage('rtc_ice_candidate', (ws, msg) => {
+    if (ws.username) {
+        const opponentWs = gameState.getOpponentWebSocket(ws.username);
+        if (opponentWs) {
+            wsHandler.send(opponentWs, { type: 'rtc_ice_candidate', candidate: msg.candidate });
+        }
+    }
+});
+
 async function start() {
     await db.connect();
     await kafkaProducer.connect();
