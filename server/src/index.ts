@@ -138,10 +138,10 @@ async function start() {
     server.listen(PORT, () => {
         console.log(`
 ╔═══════════════════════════════════════════════════════╗
-║        🎮 Nxus Server Started! 🎮                   ║
+║        🎮 Nxus Server Started! 🎮                    ║
 ╠═══════════════════════════════════════════════════════╣
-║  HTTP:      http://localhost:${PORT}                  ║
-║  WebSocket: ws://localhost:${PORT}                    ║
+║  HTTP:      http://localhost:${PORT}                    ║
+║  WebSocket: ws://localhost:${PORT}                      ║
 ╚═══════════════════════════════════════════════════════╝
         `);
     });
