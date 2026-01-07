@@ -50,6 +50,8 @@ function App() {
     useEffect(() => {
         if (!lastMessage) return;
 
+        console.log('📨 WS Message:', lastMessage.type, lastMessage);
+
         switch (lastMessage.type) {
             case 'joined':
                 setUsername(lastMessage.username);
