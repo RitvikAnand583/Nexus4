@@ -30,7 +30,7 @@ interface GameResult {
 }
 
 function App() {
-    const { connected, lastMessage, send, setStoredUsername, clearStoredUsername } = useWebSocket();
+    const { connected, lastMessage, clearLastMessage, send, setStoredUsername, clearStoredUsername } = useWebSocket();
     const [gameState, setGameState] = useState<GameState>('lobby');
     const [username, setUsername] = useState('');
     const [gameData, setGameData] = useState<GameData | null>(null);
@@ -141,7 +141,10 @@ function App() {
                 console.error('Server error:', lastMessage.message);
                 break;
         }
-    }, [lastMessage, handleSignal, startCall, endCall]);
+
+        // Clear processed message to allow next message in queue
+        clearLastMessage();
+    }, [lastMessage, handleSignal, startCall, endCall, clearLastMessage]);
 
     const handleJoin = (name: string) => {
         send({ type: 'join', username: name });

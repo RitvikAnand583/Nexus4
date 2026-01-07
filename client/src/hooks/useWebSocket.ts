@@ -11,7 +11,7 @@ interface ServerMessage {
 export function useWebSocket() {
     const [connected, setConnected] = useState(false);
     const [reconnecting, setReconnecting] = useState(false);
-    const [lastMessage, setLastMessage] = useState<ServerMessage | null>(null);
+    const [messageQueue, setMessageQueue] = useState<ServerMessage[]>([]);
     const wsRef = useRef<WebSocket | null>(null);
     const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -36,7 +36,6 @@ export function useWebSocket() {
             setConnected(true);
             setReconnecting(false);
             console.log('WebSocket connected');
-
             const storedUsername = getStoredUsername();
             if (storedUsername) {
                 console.log(`Attempting to rejoin as ${storedUsername}`);
@@ -60,7 +59,8 @@ export function useWebSocket() {
         ws.onmessage = (event) => {
             try {
                 const message = JSON.parse(event.data);
-                setLastMessage(message);
+                // Add to queue instead of overwriting
+                setMessageQueue(prev => [...prev, message]);
             } catch (e) {
                 console.error('Failed to parse message:', e);
             }
@@ -90,5 +90,30 @@ export function useWebSocket() {
         setStoredUsername(null);
     }, [setStoredUsername]);
 
-    return { connected, reconnecting, lastMessage, send, setStoredUsername, clearStoredUsername, getStoredUsername };
+    // Pop the first message from the queue
+    const popMessage = useCallback((): ServerMessage | null => {
+        if (messageQueue.length === 0) return null;
+        const [first, ...rest] = messageQueue;
+        setMessageQueue(rest);
+        return first;
+    }, [messageQueue]);
+
+    // Get the last message (for backward compatibility, returns first in queue)
+    const lastMessage = messageQueue.length > 0 ? messageQueue[0] : null;
+
+    // Clear the processed message from queue
+    const clearLastMessage = useCallback(() => {
+        setMessageQueue(prev => prev.slice(1));
+    }, []);
+
+    return {
+        connected,
+        reconnecting,
+        lastMessage,
+        clearLastMessage,
+        send,
+        setStoredUsername,
+        clearStoredUsername,
+        getStoredUsername
+    };
 }
