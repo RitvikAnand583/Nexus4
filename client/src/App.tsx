@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useWebSocket } from './hooks/useWebSocket';
+import { useWebRTC } from './hooks/useWebRTC';
 import { Lobby } from './components/Lobby';
 import { GameBoard } from './components/GameBoard';
 import { GameResult as GameResultModal } from './components/GameResult';
@@ -36,7 +37,15 @@ function App() {
     const [gameResult, setGameResult] = useState<GameResult | null>(null);
     const [showResult, setShowResult] = useState(false);
     const [voiceChatState, setVoiceChatState] = useState<VoiceChatState>('idle');
-    const [isMuted, setIsMuted] = useState(false);
+
+    // WebRTC signal sender
+    const sendRTCSignal = useCallback((type: string, data: any) => {
+        send({ type, ...data });
+    }, [send]);
+
+    const { startCall, handleSignal, toggleMute, endCall, isMuted } = useWebRTC({
+        sendSignal: sendRTCSignal,
+    });
 
     useEffect(() => {
         if (!lastMessage) return;
@@ -112,11 +121,18 @@ function App() {
 
             case 'voice_accept':
                 setVoiceChatState('connected');
+                startCall(); // Initiator starts WebRTC call
                 break;
 
             case 'voice_decline':
                 setVoiceChatState('declined');
                 setTimeout(() => setVoiceChatState('idle'), 3000);
+                break;
+
+            case 'rtc_offer':
+            case 'rtc_answer':
+            case 'rtc_ice_candidate':
+                handleSignal(lastMessage as any);
                 break;
 
             case 'error':
@@ -151,7 +167,7 @@ function App() {
         setGameData(null);
         setGameResult(null);
         setVoiceChatState('idle');
-        setIsMuted(false);
+        endCall();
     };
 
     const handleVoiceRequest = () => {
@@ -170,7 +186,7 @@ function App() {
     };
 
     const handleToggleMute = () => {
-        setIsMuted(!isMuted);
+        toggleMute();
     };
 
     const isYourTurn = gameData ? gameData.currentPlayer === gameData.yourPlayer : false;
@@ -178,7 +194,7 @@ function App() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-emerald-900 to-gray-900 flex flex-col items-center justify-center p-4 md:p-8">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-4 md:mb-8 text-gray-400">
-                Nexus4
+                Nxus
             </h1>
 
             {(gameState === 'lobby' || gameState === 'searching') && (
