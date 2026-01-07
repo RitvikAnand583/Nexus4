@@ -14,11 +14,11 @@ interface RTCSignal {
 
 const ICE_SERVERS: RTCConfiguration = {
     iceServers: [
-        // STUN servers (for discovering public IP)
+
         { urls: 'stun:stun.l.google.com:19302' },
         { urls: 'stun:stun1.l.google.com:19302' },
         { urls: 'stun:stun2.l.google.com:19302' },
-        // Free TURN servers from OpenRelay (for NAT traversal)
+
         {
             urls: 'turn:openrelay.metered.ca:80',
             username: 'openrelayproject',
@@ -47,7 +47,7 @@ export function useWebRTC({ onRemoteStream, sendSignal }: UseWebRTCOptions) {
     const [isMuted, setIsMuted] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Create audio element for remote playback
+
     useEffect(() => {
         const audio = document.createElement('audio');
         audio.autoplay = true;
@@ -63,7 +63,7 @@ export function useWebRTC({ onRemoteStream, sendSignal }: UseWebRTCOptions) {
         };
     }, []);
 
-    // Get local microphone stream with high quality settings
+
     const getLocalStream = useCallback(async () => {
         try {
             console.log('🎤 Requesting microphone access...');
@@ -214,14 +214,18 @@ export function useWebRTC({ onRemoteStream, sendSignal }: UseWebRTCOptions) {
 
     // Handle incoming RTC signal
     const handleSignal = useCallback((signal: RTCSignal) => {
+        console.log('📥 Received RTC signal:', signal.type, signal);
         switch (signal.type) {
             case 'rtc_offer':
+                console.log('📥 Processing RTC offer');
                 if (signal.offer) handleOffer(signal.offer);
                 break;
             case 'rtc_answer':
+                console.log('📥 Processing RTC answer');
                 if (signal.answer) handleAnswer(signal.answer);
                 break;
             case 'rtc_ice_candidate':
+                console.log('📥 Processing ICE candidate');
                 if (signal.candidate) handleIceCandidate(signal.candidate);
                 break;
         }
