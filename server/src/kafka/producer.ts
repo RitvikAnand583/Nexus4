@@ -17,7 +17,7 @@ class KafkaProducer {
 
     constructor() {
         this.kafka = new Kafka({
-            clientId: 'Nxus-server',
+            clientId: 'nexus4-server',
             brokers: [KAFKA_BROKER],
             logLevel: logLevel.ERROR,
             retry: {

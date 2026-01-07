@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3001';
-const USERNAME_KEY = 'Nxus_username';
+const USERNAME_KEY = 'nexus4_username';
 
 interface ServerMessage {
     type: string;
