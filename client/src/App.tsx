@@ -139,7 +139,7 @@ function App() {
                 console.error('Server error:', lastMessage.message);
                 break;
         }
-    }, [lastMessage]);
+    }, [lastMessage, handleSignal, startCall, endCall]);
 
     const handleJoin = (name: string) => {
         send({ type: 'join', username: name });
