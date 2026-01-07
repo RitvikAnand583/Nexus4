@@ -90,14 +90,6 @@ export function useWebSocket() {
         setStoredUsername(null);
     }, [setStoredUsername]);
 
-    // Pop the first message from the queue
-    const popMessage = useCallback((): ServerMessage | null => {
-        if (messageQueue.length === 0) return null;
-        const [first, ...rest] = messageQueue;
-        setMessageQueue(rest);
-        return first;
-    }, [messageQueue]);
-
     // Get the last message (for backward compatibility, returns first in queue)
     const lastMessage = messageQueue.length > 0 ? messageQueue[0] : null;
 
