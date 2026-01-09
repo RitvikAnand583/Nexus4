@@ -105,7 +105,7 @@ export function GameBoard({
                         : "bg-gray-800/50 text-gray-400 border border-gray-700"
                 )}
             >
-                {isYourTurn ? "🎯 Your Turn!" : "⏳ Waiting..."}
+                {isYourTurn ? " Your Turn!" : " Waiting..."}
             </motion.div>
         </div>
     );
