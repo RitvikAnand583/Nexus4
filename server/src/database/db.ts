@@ -46,9 +46,9 @@ class DatabaseService {
             const client = await pool.connect();
             client.release();
             this.connected = true;
-            console.log('✅ PostgreSQL connected');
+            console.log(' PostgreSQL connected');
         } catch (error) {
-            console.warn('⚠️ PostgreSQL not available, data will not be persisted');
+            console.warn(' PostgreSQL not available, data will not be persisted');
             this.connected = false;
         }
     }

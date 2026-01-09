@@ -25,7 +25,7 @@ wsHandler.onMessage('join', (ws, msg) => {
         wsHandler.registerUser(ws, msg.username);
         db.upsertPlayer(msg.username);
         wsHandler.send(ws, { type: 'joined', username: msg.username });
-        console.log(`👤 User joined: ${msg.username}`);
+        console.log(`User joined: ${msg.username}`);
     }
 });
 
@@ -52,7 +52,7 @@ wsHandler.onMessage('move', (ws, msg) => {
 wsHandler.onMessage('rejoin', (ws, msg) => {
     if (msg.username) {
         if (gameState.handleReconnect(ws, msg.username)) {
-            console.log(`🔄 ${msg.username} rejoined game`);
+            console.log(`${msg.username} rejoined game`);
         } else {
             wsHandler.registerUser(ws, msg.username);
             wsHandler.send(ws, { type: 'joined', username: msg.username });
@@ -69,13 +69,13 @@ wsHandler.onMessage('_disconnect', (ws, msg) => {
 
 // Voice Chat Signaling
 wsHandler.onMessage('voice_request', (ws, msg) => {
-    console.log(`🎤 Voice request from ${ws.username}`);
+    console.log(`Voice request from ${ws.username}`);
     if (ws.username) {
         const opponentWs = gameState.getOpponentWebSocket(ws.username);
-        console.log(`🎤 Opponent socket found: ${opponentWs ? opponentWs.username : 'null'}`);
+        console.log(`Opponent socket found: ${opponentWs ? opponentWs.username : 'null'}`);
         if (opponentWs) {
             wsHandler.send(opponentWs, { type: 'voice_request', from: ws.username });
-            console.log(`🎤 Voice request sent to ${opponentWs.username}`);
+            console.log(`Voice request sent to ${opponentWs.username}`);
         }
     }
 });
@@ -100,24 +100,24 @@ wsHandler.onMessage('voice_decline', (ws, msg) => {
 
 // WebRTC Signaling
 wsHandler.onMessage('rtc_offer', (ws, msg) => {
-    console.log(`📡 RTC offer from ${ws.username}`);
+    console.log(`RTC offer from ${ws.username}`);
     if (ws.username) {
         const opponentWs = gameState.getOpponentWebSocket(ws.username);
-        console.log(`📡 Forwarding offer to: ${opponentWs?.username || 'NOT FOUND'}`);
+        console.log(`Forwarding offer to: ${opponentWs?.username || 'NOT FOUND'}`);
         if (opponentWs) {
             wsHandler.send(opponentWs, { type: 'rtc_offer', offer: msg.offer });
-            console.log(`📡 RTC offer sent to ${opponentWs.username}`);
+            console.log(`RTC offer sent to ${opponentWs.username}`);
         }
     }
 });
 
 wsHandler.onMessage('rtc_answer', (ws, msg) => {
-    console.log(`📡 RTC answer from ${ws.username}`);
+    console.log(`RTC answer from ${ws.username}`);
     if (ws.username) {
         const opponentWs = gameState.getOpponentWebSocket(ws.username);
         if (opponentWs) {
             wsHandler.send(opponentWs, { type: 'rtc_answer', answer: msg.answer });
-            console.log(`📡 RTC answer sent to ${opponentWs.username}`);
+            console.log(`RTC answer sent to ${opponentWs.username}`);
         }
     }
 });

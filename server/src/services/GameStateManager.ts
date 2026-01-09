@@ -89,7 +89,7 @@ class GameStateManager {
         });
 
         kafkaProducer.playerDisconnected(game.id, username);
-        console.log(`⏳ ${username} disconnected, 30s to reconnect`);
+        console.log(` ${username} disconnected, 30s to reconnect`);
     }
 
     handleReconnect(ws: GameWebSocket, username: string): boolean {
@@ -119,7 +119,7 @@ class GameStateManager {
         wsHandler.sendToUser(opponent, { type: 'opponentReconnected' });
 
         kafkaProducer.playerReconnected(game.id, username);
-        console.log(`🔄 ${username} reconnected to game ${game.id}`);
+        console.log(` ${username} reconnected to game ${game.id}`);
         return true;
     }
 
@@ -144,7 +144,7 @@ class GameStateManager {
         });
 
         matchmaking.endGame(game.id);
-        console.log(`⌛ ${username} failed to reconnect - ${winner} wins`);
+        console.log(` ${username} failed to reconnect - ${winner} wins`);
     }
 
     isDisconnected(username: string): boolean {
@@ -218,7 +218,7 @@ class GameStateManager {
         this.disconnectedPlayers.delete(game.player2);
 
         matchmaking.endGame(game.id);
-        console.log(`🏆 Game ${game.id}: ${winner || 'Draw'} (${result})`);
+        console.log(` Game ${game.id}: ${winner || 'Draw'} (${result})`);
     }
 
     private getPlayerNumber(game: ActiveGame, username: string): Player | null {
@@ -292,7 +292,7 @@ class GameStateManager {
         this.persistGame(game, game.isPlayer2Bot ? null : winner, 'forfeit', duration);
 
         matchmaking.endGame(game.id);
-        console.log(`🚪 Game ${game.id}: ${username} forfeited`);
+        console.log(` Game ${game.id}: ${username} forfeited`);
     }
 }
 

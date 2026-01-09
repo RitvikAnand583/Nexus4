@@ -32,9 +32,9 @@ class KafkaProducer {
         try {
             await this.producer.connect();
             this.connected = true;
-            console.log('✅ Kafka producer connected');
+            console.log(' Kafka producer connected');
         } catch (error) {
-            console.warn('⚠️ Kafka not available, events will not be published');
+            console.warn(' Kafka not available, events will not be published');
             this.connected = false;
         }
     }

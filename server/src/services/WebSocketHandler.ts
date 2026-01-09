@@ -51,7 +51,7 @@ class WebSocketHandler {
             });
         }, 30000);
 
-        console.log('✅ WebSocket server initialized');
+        console.log(' WebSocket server initialized');
     }
 
     onMessage(type: string, handler: MessageHandler): void {
@@ -64,7 +64,7 @@ class WebSocketHandler {
         ws.isAlive = true;
         this.clients.set(ws.id, ws);
 
-        console.log(`🔌 Client connected: ${ws.id}`);
+        console.log(` Client connected: ${ws.id}`);
 
         ws.on('pong', () => {
             ws.isAlive = true;
@@ -99,7 +99,7 @@ class WebSocketHandler {
     }
 
     private handleDisconnect(ws: GameWebSocket): void {
-        console.log(`🔌 Client disconnected: ${ws.id} (${ws.username || 'anonymous'})`);
+        console.log(` Client disconnected: ${ws.id} (${ws.username || 'anonymous'})`);
 
         const disconnectHandler = this.messageHandlers.get('_disconnect');
         if (disconnectHandler) {

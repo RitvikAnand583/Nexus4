@@ -56,7 +56,7 @@ class MatchmakingService {
             });
 
             wsHandler.send(ws, { type: 'queued', message: 'Searching for opponent...' });
-            console.log(`🔍 ${username} added to queue (${this.queue.size} in queue)`);
+            console.log(` ${username} added to queue (${this.queue.size} in queue)`);
         }
     }
 
@@ -65,7 +65,7 @@ class MatchmakingService {
         if (player) {
             clearTimeout(player.timeoutId);
             this.queue.delete(username);
-            console.log(`❌ ${username} removed from queue`);
+            console.log(` ${username} removed from queue`);
             return true;
         }
         return false;
@@ -92,7 +92,7 @@ class MatchmakingService {
 
         this.removeFromQueue(username);
         this.startGame(username, 'Bot', true);
-        console.log(`🤖 ${username} matched with Bot (timeout)`);
+        console.log(` ${username} matched with Bot (timeout)`);
     }
 
     startGame(player1: string, player2: string, isPlayer2Bot: boolean): string {
@@ -131,7 +131,7 @@ class MatchmakingService {
 
         kafkaProducer.gameStarted(gameId, player1, player2, isPlayer2Bot);
 
-        console.log(`🎮 Game started: ${player1} vs ${player2} (${gameId})`);
+        console.log(` Game started: ${player1} vs ${player2} (${gameId})`);
         return gameId;
     }
 
@@ -153,7 +153,7 @@ class MatchmakingService {
                 this.playerGames.delete(game.player2);
             }
             this.games.delete(gameId);
-            console.log(`🏁 Game ended: ${gameId}`);
+            console.log(` Game ended: ${gameId}`);
         }
     }
 

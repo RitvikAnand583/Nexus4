@@ -72,7 +72,7 @@ export function useWebRTC({ onRemoteStream, sendSignal }: UseWebRTCOptions) {
                 const ctx = new AudioContext();
                 if (ctx.state === 'suspended') {
                     await ctx.resume();
-                    console.log('🔊 AudioContext resumed');
+                    console.log('AudioContext resumed');
                 }
             }
 
@@ -106,7 +106,7 @@ export function useWebRTC({ onRemoteStream, sendSignal }: UseWebRTCOptions) {
 
     const getLocalStream = useCallback(async () => {
         try {
-            console.log('🎤 Requesting microphone access...');
+            console.log('Requesting microphone access...');
             const stream = await navigator.mediaDevices.getUserMedia({
                 audio: {
                     echoCancellation: true,
@@ -119,11 +119,11 @@ export function useWebRTC({ onRemoteStream, sendSignal }: UseWebRTCOptions) {
                 },
                 video: false
             });
-            console.log('🎤 Microphone access granted!');
+            console.log('Microphone access granted!');
             localStreamRef.current = stream;
             return stream;
         } catch (err) {
-            console.error('❌ Failed to get microphone:', err);
+            console.error('Failed to get microphone:', err);
             setError('Microphone access denied');
             return null;
         }
@@ -131,18 +131,18 @@ export function useWebRTC({ onRemoteStream, sendSignal }: UseWebRTCOptions) {
 
     // Create peer connection
     const createPeerConnection = useCallback(() => {
-        console.log('📡 Creating peer connection...');
+        console.log('Creating peer connection...');
         const pc = new RTCPeerConnection(ICE_SERVERS);
 
         pc.onicecandidate = (event) => {
             if (event.candidate) {
-                console.log('🧊 Sending ICE candidate');
+                console.log('Sending ICE candidate');
                 sendSignal('rtc_ice_candidate', { candidate: event.candidate });
             }
         };
 
         pc.ontrack = (event) => {
-            console.log('🔊 Received remote audio track!');
+            console.log('Received remote audio track!');
             if (remoteAudioRef.current && event.streams[0]) {
                 const audio = remoteAudioRef.current;
                 audio.srcObject = event.streams[0];
@@ -152,9 +152,9 @@ export function useWebRTC({ onRemoteStream, sendSignal }: UseWebRTCOptions) {
                 // Try to play immediately
                 const tryPlay = () => {
                     audio.play()
-                        .then(() => console.log('🔊 Audio playing!'))
+                        .then(() => console.log('Audio playing!'))
                         .catch(err => {
-                            console.warn('⚠️ Audio autoplay blocked, waiting for user interaction:', err.message);
+                            console.warn('Audio autoplay blocked, waiting for user interaction:', err.message);
                         });
                 };
 
@@ -174,18 +174,18 @@ export function useWebRTC({ onRemoteStream, sendSignal }: UseWebRTCOptions) {
         };
 
         pc.onconnectionstatechange = () => {
-            console.log('📶 Connection state:', pc.connectionState);
+            console.log('Connection state:', pc.connectionState);
             if (pc.connectionState === 'connected') {
-                console.log('✅ WebRTC connected!');
+                console.log('WebRTC connected!');
                 setIsConnected(true);
             } else if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
-                console.log('❌ WebRTC disconnected');
+                console.log('WebRTC disconnected');
                 setIsConnected(false);
             }
         };
 
         pc.oniceconnectionstatechange = () => {
-            console.log('🧊 ICE state:', pc.iceConnectionState);
+            console.log('ICE state:', pc.iceConnectionState);
         };
 
         peerConnectionRef.current = pc;
@@ -222,7 +222,7 @@ export function useWebRTC({ onRemoteStream, sendSignal }: UseWebRTCOptions) {
     const handleOffer = useCallback(async (offer: RTCSessionDescriptionInit) => {
         try {
             setError(null);
-            console.log('🎧 Processing incoming offer...');
+            console.log('Processing incoming offer...');
             const stream = await getLocalStream();
             if (!stream) return;
 
@@ -234,11 +234,11 @@ export function useWebRTC({ onRemoteStream, sendSignal }: UseWebRTCOptions) {
             });
 
             await pc.setRemoteDescription(new RTCSessionDescription(offer));
-            console.log('📥 Remote description set');
+            console.log('Remote description set');
 
             // Process any queued ICE candidates
             if (pendingCandidatesRef.current.length > 0) {
-                console.log(`🧊 Processing ${pendingCandidatesRef.current.length} queued ICE candidates`);
+                console.log(`Processing ${pendingCandidatesRef.current.length} queued ICE candidates`);
                 for (const candidate of pendingCandidatesRef.current) {
                     await pc.addIceCandidate(new RTCIceCandidate(candidate));
                 }
@@ -250,7 +250,7 @@ export function useWebRTC({ onRemoteStream, sendSignal }: UseWebRTCOptions) {
             await pc.setLocalDescription(answer);
             sendSignal('rtc_answer', { answer });
 
-            console.log('✅ Sent RTC answer');
+            console.log('Sent RTC answer');
         } catch (err) {
             console.error('Failed to handle offer:', err);
             setError('Failed to connect');
@@ -263,11 +263,11 @@ export function useWebRTC({ onRemoteStream, sendSignal }: UseWebRTCOptions) {
             const pc = peerConnectionRef.current;
             if (pc) {
                 await pc.setRemoteDescription(new RTCSessionDescription(answer));
-                console.log('📥 Set remote description from answer');
+                console.log('Set remote description from answer');
 
                 // Process any queued ICE candidates
                 if (pendingCandidatesRef.current.length > 0) {
-                    console.log(`🧊 Processing ${pendingCandidatesRef.current.length} queued ICE candidates`);
+                    console.log(`Processing ${pendingCandidatesRef.current.length} queued ICE candidates`);
                     for (const candidate of pendingCandidatesRef.current) {
                         await pc.addIceCandidate(new RTCIceCandidate(candidate));
                     }
@@ -285,10 +285,10 @@ export function useWebRTC({ onRemoteStream, sendSignal }: UseWebRTCOptions) {
             const pc = peerConnectionRef.current;
             if (pc && pc.remoteDescription) {
                 await pc.addIceCandidate(new RTCIceCandidate(candidate));
-                console.log('✅ Added ICE candidate');
+                console.log('Added ICE candidate');
             } else {
                 // Queue the candidate for later when peer connection is ready
-                console.log('📦 Queuing ICE candidate (peer connection not ready)');
+                console.log('Queuing ICE candidate (peer connection not ready)');
                 pendingCandidatesRef.current.push(candidate);
             }
         } catch (err) {
@@ -298,18 +298,18 @@ export function useWebRTC({ onRemoteStream, sendSignal }: UseWebRTCOptions) {
 
     // Handle incoming RTC signal
     const handleSignal = useCallback((signal: RTCSignal) => {
-        console.log('📥 Received RTC signal:', signal.type, signal);
+        console.log('Received RTC signal:', signal.type, signal);
         switch (signal.type) {
             case 'rtc_offer':
-                console.log('📥 Processing RTC offer');
+                console.log('Processing RTC offer');
                 if (signal.offer) handleOffer(signal.offer);
                 break;
             case 'rtc_answer':
-                console.log('📥 Processing RTC answer');
+                console.log('Processing RTC answer');
                 if (signal.answer) handleAnswer(signal.answer);
                 break;
             case 'rtc_ice_candidate':
-                console.log('📥 Processing ICE candidate');
+                console.log('Processing ICE candidate');
                 if (signal.candidate) handleIceCandidate(signal.candidate);
                 break;
         }
